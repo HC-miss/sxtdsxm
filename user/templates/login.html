@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}登录{% endblock %}
+
+{% block main %}
+    <div class="login-body">
+        <div class="login-card">
+            <div class="login-top">
+                <h3>新用户登录</h3>
+                <h5>尊敬的用户，欢迎您回来！</h5>
+            </div>
+            <div class="login-bottom">
+                <form method="post" action="/user/login/" onsubmit="return login();">
+                    <input type="hidden" name="time" id="time">
+                    <div class="login-input-box">
+                        {% csrf_token %}
+
+                        <input type="text" id="account" name="account" value="" class="login-admin active" placeholder="邮箱登录">
+                        <span style="color:red;" id="aSpan"></span>
+
+                        <input type="password" id="password" name="password" value="" class="login-password">
+                        <span style="color:red;" id="pSpan"></span>
+
+                        <input type="text" style="height:36px;width: 100px;" id="code" onblur="checkCode(this.value)"><img src="/user/vcode/" onclick="changeCode(this)"><span style="color:red;" id="cSpan"></span>
+
+                        <input type="hidden" name="redirect" value="{{ red }}">
+                        <input type="hidden" name="cartitems" value="None">
+
+                        <button class="login-btn" style="color: white;text-decoration: none;cursor: pointer">登录</button>
+                    </div>
+                </form>
+                <div class="login-img">
+                    <img src="/static/images/login_05.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footerjs %}
+    <script src="/static/js/md5-min.js"></script>
+    <script>
+        function isEmail(str){
+            var reg = /^[a-zA-Z0-9_-]{5,}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+            return reg.test(str);
+        }
+
+        $('#account').blur(function () {
+            if(isEmail($(this).val()) == false ){
+                $('#aSpan').html('邮箱格式不正确');
+            }else{
+                $('#aSpan').empty();
+            }
+        });
+
+        function login(){
+            //获取输入框的值
+            var account = $('#account').val();
+            var password = $('#password').val();
+            //简单校验
+            if(account.length<6 || !isEmail(account)){
+                $('#aSpan').text('邮箱长度不能小于六位');
+                return false;
+            }
+            $('#aSpan').text('');
+            if(password.length<6){
+                $('#pSpan').text('密码长度不能小于六位');
+                return false;
+            }
+            $('#pSpan').text('');
+            var code = $('#code').val();
+            var cflag = checkCode(code);
+
+            if(!cflag){
+                $('#cSpan').text('×');
+                return false;
+            }
+            $('#cSpan').text('');
+            var time = new Date().getTime();
+            $('#time').val(time);
+
+            var hex_pwd = hex_md5(password);
+            // 加盐加密
+{#            var hex_pwd = hex_md5(password+time);#}
+            $('#password').val(hex_pwd);
+        }
+
+        //切换验证码
+        function changeCode(obj){
+            $(obj).attr('src','/user/vcode/?r='+new Date().getTime())
+        }
+
+
+        function checkCode(txt){
+            var cflag = false;
+            $.ajax({
+                url:'/user/checkcode/',
+                type:'get',
+                data:{'code':txt },
+                async:false,
+                success:function(result){
+                    var flag = result.checkFlag;
+                    if(flag){
+                        cflag = true;
+                        $('#cSpan').text('√');
+                    }else{
+                        $('#cSpan').text('×');
+                    }
+                }
+            });
+
+            return cflag;
+        }
+        {% if msg %}
+            alert('{{ msg }}');
+        {% endif %}
+    </script>
+
+{% endblock %}
+
