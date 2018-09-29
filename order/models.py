@@ -6,7 +6,7 @@ from goods.models import *
 class Order(models.Model):
     order_num = models.CharField(max_length=50)
     out_trade_num = models.UUIDField()
-    trade_no = models.CharField(max_length=120, null=True)
+    trade_no = models.CharField(max_length=120, null=True, blank=True)
     status = models.CharField(max_length=20)
     pay_way = models.CharField(max_length=20)
     address = models.ForeignKey(Address, on_delete=models.CASCADE)

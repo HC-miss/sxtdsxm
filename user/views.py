@@ -15,12 +15,14 @@ def login(request):
         account = request.POST.get('account')
         password = request.POST.get('password')
         red = request.POST.get('redirect')
+        cartitems = request.POST.get('cartitems')
         user = UserInfo.objects.filter(uname=account)
         if user:
             pwd = user[0].pwd
             if pwd == password:
                 request.session['user'] = user[0]
                 cart = request.session.get('cart')
+                # 只有从购物车页面登录的用户才能将商品同步到账户当中
                 if red == 'cart' and cart:
                     for k, v in cart.items():
                         goods = user[0].cartitem_set.filter(goods=v[0], color=v[1], size=v[2])
@@ -30,10 +32,21 @@ def login(request):
                             CartItem.objects.create(goods=v[0], color=v[1], size=v[2], count=v[3], user=user[0])
                     del request.session['cart']
                     return redirect('/cart/')
+                # 点击结算按钮 将购物车商品同步到账户
+                if red == 'order' and cart:
+                    for k, v in cart.items():
+                        goods = user[0].cartitem_set.filter(goods=v[0], color=v[1], size=v[2])
+                        if goods:
+                            goods.update(count=v[3])
+                        else:
+                            CartItem.objects.create(goods=v[0], color=v[1], size=v[2], count=v[3], user=user[0])
+                    del request.session['cart']
+                    return redirect('/order/?cartitems='+cartitems)
                 return redirect('/user/usercenter/')
         return render(request, 'login.html', {'msg': '登录失败，账号或者密码错误'})
     elif request.method == 'GET':
         red = request.GET.get('redirect', '')
+        cartitems = request.GET.get('cartitems', '')
         return render(request, 'login.html', {'red': red})
 
 

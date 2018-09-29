@@ -133,6 +133,10 @@ $(function () {
             $priceTotalObj = $(this).parents('.order_lists').find('.sum_price'),
             $price = $(this).parents('.order_lists').find('.price').html(),  //单价
             $priceTotal = $count*parseInt($price.substring(1));
+            console.log($price);
+            console.log($price.substring(1));
+            console.log($count);
+            console.log($priceTotal);
         $inputVal.val($count);
         $priceTotalObj.html('￥'+$priceTotal);
         if($inputVal.val()>1 && $obj.hasClass('reSty')){
@@ -167,7 +171,7 @@ $(function () {
         }
         $(this).val($(this).val().replace(/\D|^0/g,''));
         $count = $(this).val();
-        $priceTotal = $count*parseInt($price.substring(1));
+        $priceTotal = $count*parseFloat($price.substring(1));
         $(this).attr('value',$count);
         $priceTotalObj.html('￥'+$priceTotal);
         totalMoney();

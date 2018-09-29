@@ -27,6 +27,7 @@
                         {% for site in user.address_set.all %}
                             {% if site.isdefault %}
                                 <div class="tit clearfix">
+                                    <input type="hidden" name="address" value="{{ site.id }}" id="address">
                                     <p class="fl"><span id="name_address">{{ site.aname }}</span>
                                         <span class="default">[默认地址]</span>
                                     </p>
@@ -57,8 +58,7 @@
                 <div class="msg">
                     <h3>订单内容</h3>
                     <!--------ul---------------->
-                    {% for goods in user.cartitem_set.all %}
-                    {% if not goods.isdelete %}
+                    {% for goods in goodss %}
 
                     <ul class="clearfix" goodsid="{{ goods.goods.id }}" sizeid="{{ goods.size.id }}" colorid="{{ goods.color.id }}" count="{{ goods.count }}">
                         <li class="fl">
@@ -72,7 +72,6 @@
                         <li class="fr">￥{% widthratio goods.goods.price 1 goods.count %}</li>
                     </ul>
 
-                    {% endif %}
                     {% endfor %}
 
                 </div>
@@ -87,7 +86,7 @@
                     <p><span class="fl">合计：</span><span class="fr" id="sum_price">￥769.0</span></p>
                 </div>
                 <!--<input type="button" name="" value="去支付"> -->
-                <a href="/order/order.html" id="pay" class="pay" onclick="javascript:void(0);">去支付</a>
+                <a href="javascript:void(0)" id="pay" class="pay">去支付</a>
             </div>
         </div>
     </div>
@@ -111,10 +110,9 @@
                     "count":$(item).attr('count')
                 })
             });
-
-
+            var address = $('#address').val();
             //拼接请求参数
-            var params = 'address=1&payway='+$('.way .on').attr('name')+'&cartitems='+JSON.stringify(cartitems);
+            var params = 'address='+address+'&payway='+$('.way .on').attr('name')+'&cartitems='+JSON.stringify(cartitems);
 
             //拼接请求地址
             var url = '/order/toorder/?'+params;
@@ -126,6 +124,7 @@
         $.each($('.msg ul'),function(index,item){
 {#                    var count = $(item).attr('count');#}
                     var goods_price = $(item).children().last().text();
+                    console.log(goods_price);
                     sum += parseInt(goods_price.substring(1))
                 }
             );
